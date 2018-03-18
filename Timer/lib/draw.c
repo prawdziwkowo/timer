@@ -17,15 +17,22 @@ u8g_t u8g;
 const char PROGMEM text_load[] = "[*]load";
 const char PROGMEM text_save[] = "[*]save";
 const char PROGMEM text_start[] = "[#]start";
-const char PROGMEM text_stop[] = "[#]stop";
+const char PROGMEM text_pause[] = "[#]pause";
 const char PROGMEM text_exit[] = "[#]exit";
 const char PROGMEM text_reset[] = "[*]reset";
 const char PROGMEM text_memory_select[] = "[A-D]sel";
 const char PROGMEM text_empty[] = "";
 const char PROGMEM text_entered_time[] = "Entered time:";
 
-//TODO: trzeba dodaæ obs³uge typów wyœwietlanego ekranu (main, memory i tp)
-//TODO: dodaæ obs³ugê aktualnie przycisniêtego przycisku (chyba ???)
+void initDisplay()
+{
+	u8g_InitI2C(&u8g, &u8g_dev_ssd1306_128x64_i2c, U8G_I2C_OPT_NONE|U8G_I2C_OPT_FAST);
+	u8g_FirstPage(&u8g);
+	do
+	{
+	} while ( u8g_NextPage(&u8g) );
+}
+
 void draw(uint8_t screen, uint16_t seconds, struct displayTime time)
 {
 	u8g_FirstPage(&u8g);
@@ -48,16 +55,6 @@ void draw(uint8_t screen, uint16_t seconds, struct displayTime time)
 		}
 		
 		drawMainMenuByScreen(screen);
-	} while ( u8g_NextPage(&u8g) );
-}
-
-
-void initDisplay()
-{
-	u8g_InitI2C(&u8g, &u8g_dev_ssd1306_128x64_i2c, U8G_I2C_OPT_NONE|U8G_I2C_OPT_FAST);
-	u8g_FirstPage(&u8g);
-	do
-	{		
 	} while ( u8g_NextPage(&u8g) );
 }
 
@@ -129,7 +126,7 @@ void drawMainMenuByScreen(uint8_t screen)
 			drawMainMenu(text_load, text_start);
 			break;
 		case SCREEN_COUNTING:
-			drawMainMenu(text_empty, text_stop);
+			drawMainMenu(text_empty, text_pause);
 			break;
 		case SCREEN_PAUSED:
 			drawMainMenu(text_reset, text_start);
@@ -145,6 +142,9 @@ void drawMainMenuByScreen(uint8_t screen)
 			break;
 		case SCREEN_CHOOSED_TIME:
 			drawMainMenu(text_save, text_start);
+			break;
+		case SCREEN_CHOOSING_TIME:
+			drawMainMenu(text_empty, text_exit);
 			break;
 	}
 }

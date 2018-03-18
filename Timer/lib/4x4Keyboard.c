@@ -61,6 +61,7 @@ uint8_t check_kbr (void)
 	return (0);
 }
 
+//kod przyciskui na cyfre je¿eli mu odpowiada
 signed char map_key_to_digit(uint8_t key) 
 {
 	switch (key) {

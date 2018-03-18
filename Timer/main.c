@@ -1,8 +1,6 @@
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <stdlib.h>
-#include <avr/pgmspace.h>
-#include <util/delay.h>
 #include <string.h>
 
 
@@ -62,7 +60,6 @@ int main(void)
     }
 }
 
-
 void run_action_screen_counting()
 {
 	switch(selected_sign) {
@@ -72,14 +69,6 @@ void run_action_screen_counting()
 			redraw = 1;
 			break;
 	}
-}
-
-struct displayTime get_empty_time_struct()
-{
-	struct displayTime ret;
-	ret.hours[0] = ret.minutesH[0] = ret.minutesL[0] = ret.secondsH[0] = ret.secondsL[0] = '_';
-	ret.hours[1] = ret.minutesH[1] = ret.minutesL[1] = ret.secondsH[1] = ret.secondsL[1] = '\0';
-	return ret;
 }
 
 void run_action_screen_choosed_time()
@@ -97,19 +86,34 @@ void run_action_screen_choosed_time()
 	}
 }
 
+struct displayTime get_empty_time_struct()
+{
+	struct displayTime ret;
+	ret.hours[0] = ret.minutesH[0] = ret.minutesL[0] = ret.secondsH[0] = ret.secondsL[0] = '_';
+	ret.hours[1] = ret.minutesH[1] = ret.minutesL[1] = ret.secondsH[1] = ret.secondsL[1] = '\0';
+	return ret;
+}
+
 void run_action_screen_choosing_time()
 {
 	static uint8_t digits_count = 0;
 	static uint16_t new_seconds = 0;
 	signed char digit;
 	digit = map_key_to_digit(selected_sign);
+	
+	if (selected_sign == 12) { //#
+		screen = SCREEN_START;
+		new_seconds = 0;
+		digits_count = 0;
+		redraw = 1;
+	}
+	
 	if (digit >= 0) {
 		screen = SCREEN_CHOOSING_TIME;
 		redraw = 1;
 		if (!digits_count) {
 			entered_time = get_empty_time_struct();
 		}
-		
 		
 		digits_count ++;
 		
@@ -154,7 +158,6 @@ void run_action_screen_choosing_time()
 				
 				break;
 		}
-		
 	}
 }
 
