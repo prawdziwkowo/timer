@@ -60,6 +60,8 @@ void active_row (char x);
 
 // Sprawdzenie przycisk¡w.
 uint8_t check_kbr (void);
+
+signed char map_key_to_digit(uint8_t key);
  
 /*
 

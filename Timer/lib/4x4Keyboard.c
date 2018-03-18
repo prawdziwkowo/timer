@@ -1,5 +1,5 @@
 #include <avr/io.h>
-#include "Keyboard.h"
+#include "4x4Keyboard.h"
 
 //Inicjalizacja obs³ugi klawiarury.
 void init_4x4_kbr (void)
@@ -52,7 +52,6 @@ uint8_t check_kbr (void)
 	do
 	{
 		active_row (n);
-		//TODO: zamiast delay zrobiæ jednefo nopa i zobaczyæ czy dzia³a
 		asm volatile ("nop"); //synchronizator, trzeba odczekac jeden tak zegara pomiedzy wpisaniem danym do PORTx a przeczytaniem z PINx
 		if (~PIN_K1 & (1 << K1)) return (1+n*4);
 		if (~PIN_K2 & (1 << K2)) return (2+n*4);
@@ -60,4 +59,31 @@ uint8_t check_kbr (void)
 		if (~PIN_K4 & (1 << K4)) return (4+n*4);
 	} while(n++ < 3);
 	return (0);
+}
+
+signed char map_key_to_digit(uint8_t key) 
+{
+	switch (key) {
+		case 1:
+			return 1;
+		case 5:
+			return 2;
+		case 9:
+			return 3;
+		case 2:
+			return 4;
+		case 6:
+			return 5;
+		case 10:
+			return 6;
+		case 3:
+			return 7;
+		case 7:
+			return 8;
+		case 11:
+			return 9;
+		case 8:
+			return 0;
+	}
+	return -1;
 }
