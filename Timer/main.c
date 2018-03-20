@@ -1,3 +1,9 @@
+/*
+Klawiatura na pinach PD2-PD7, PB0, PB1 (2-9 arduino)
+Wyúwietlacz na i2c
+Przekaünik na pinie PC3 (A3 arduinbo)
+*/
+
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <stdlib.h>
@@ -20,7 +26,6 @@ volatile uint16_t seconds;
 volatile uint8_t clocks;
 volatile uint8_t redraw = 1;
 volatile uint8_t screen = SCREEN_START;
-volatile uint8_t enable_counting = 0;
 
 volatile uint8_t selected_sign = 0;
 volatile uint8_t prev_sign;
@@ -38,11 +43,33 @@ void inline timer0_init()
 	TIMSK0 |= (1<<TOIE0); //przerwanie ov
 }
 
+void inline init_pins()
+{
+	DDRC |= (1<<3);
+	PORTC |= (1<<3);
+}
+
+void enable_counting()
+{
+	PORTC &= ~(1<<3);
+}
+
+void disable_counting()
+{
+	PORTC |= (1<<3);
+}
+
+uint8_t counting_enabled()
+{
+	return !(PINC & (1<<3));
+}
+
 int main(void)
 {
 	initDisplay();
 	init_4x4_kbr ();
 	timer0_init();
+	init_pins();
 	
 	uart_init( UART_BAUD_SELECT(UART_BAUD_RATE,F_CPU) );
 	sei();
@@ -64,7 +91,7 @@ void run_action_screen_counting()
 {
 	switch(selected_sign) {
 		case 12: //#
-			enable_counting = 0;
+			disable_counting();
 			screen = SCREEN_PAUSED;
 			redraw = 1;
 			break;
@@ -75,7 +102,7 @@ void run_action_screen_choosed_time()
 {
 	switch(selected_sign) {
 		case 12: //#
-			enable_counting = 1;
+			enable_counting();
 			screen = SCREEN_COUNTING;
 			redraw = 1;
 			break;
@@ -167,7 +194,7 @@ void run_action_screen_start()
 	
 	switch(selected_sign) {
 		case 12: //#
-			enable_counting = 1;
+			enable_counting();
 			screen = SCREEN_COUNTING;
 			redraw = 1;
 			break;
@@ -192,7 +219,7 @@ void run_action_screen_paused()
 {
 	switch(selected_sign) {
 		case 12: //#
-			enable_counting = 1;
+			enable_counting();
 			screen = SCREEN_COUNTING;
 			redraw = 1;
 			break;
@@ -275,14 +302,14 @@ void run_action()
 ISR(TIMER0_OVF_vect) 
 {	
 	uint8_t sign;
-	if (enable_counting) {
+	if (counting_enabled()) {
 		clocks ++;
 		if (clocks > 250) {
 			seconds --;
 			clocks = 0;
 			redraw = 1;
 			if (seconds == 0) {
-				enable_counting = 0;
+				disable_counting();
 				screen = SCREEN_END;
 			}
 		}
